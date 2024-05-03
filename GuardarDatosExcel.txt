@@ -1,0 +1,95 @@
+Sub GuardarDatosEnTablaFDN()
+    Dim ws As Worksheet
+    Dim wsTabla As Worksheet
+    Dim tbl As ListObject
+    Dim newRow As ListRow
+    Dim respuesta As VbMsgBoxResult
+    Dim direccionCarpeta As String
+    Dim archivoDestino As String
+    Dim appExcel As Object
+    Dim wbDestino As Object
+    Dim libroAbierto As Boolean
+    
+    ' Definir la hoja de trabajo donde están los datos
+    Set ws = ThisWorkbook.Sheets("FormatoAusentismo") ' Nombre de la hoja de trabajo con los datos
+    
+    ' Obtener la dirección de la carpeta donde se encuentran los archivos
+    direccionCarpeta = ThisWorkbook.Sheets("Variables").Range("B6").Value
+    
+    ' Definir la dirección del archivo destino
+    archivoDestino = direccionCarpeta & "\2024, Concentrado de Mov.xlsx"
+    
+    ' Verificar si el libro de destino está abierto
+    For Each wb In Workbooks
+        If wb.Name = "2024, Concentrado de Mov.xlsx" Then
+            Set wbDestino = wb
+            libroAbierto = True
+            Exit For
+        End If
+    Next wb
+    
+    ' Si el libro de destino está cerrado, abrirlo
+    If Not libroAbierto Then
+        Set appExcel = CreateObject("Excel.Application")
+        appExcel.Visible = False
+        Set wbDestino = appExcel.Workbooks.Open(archivoDestino)
+    End If
+    
+    ' Definir la hoja de trabajo donde está la tabla
+    Set wsTabla = wbDestino.Sheets("Ausentismo")
+    
+    ' Definir la tabla
+    Set tbl = wsTabla.ListObjects("TablaPermisosFDN")
+    
+    ' Mostrar mensaje de confirmación
+    respuesta = MsgBox("¿Estás seguro de guardar los datos?", vbQuestion + vbYesNo, "Confirmar Guardado")
+    
+    ' Verificar respuesta
+    If respuesta = vbYes Then
+        ' Agregar una nueva fila a la tabla
+        Set newRow = tbl.ListRows.Add
+        
+        ' Código de empleado
+        newRow.Range(1).Value = ws.Range("C9").Value
+        ' Tipo de permiso
+        newRow.Range(3).Value = ws.Range("G10").Value
+        ' Fecha de permiso
+        newRow.Range(4).Value = ws.Range("G9").Value
+        ' Motivo
+        newRow.Range(5).Value = ws.Range("B13").Value
+        ' Fecha inicio
+        newRow.Range(6).Value = ws.Range("C17").Value
+        ' Fecha fin
+        newRow.Range(7).Value = ws.Range("E17").Value
+        ' Fecha de regreso
+        newRow.Range(8).Value = ws.Range("G17").Value
+        ' Hora inicio
+        newRow.Range(9).Value = ws.Range("C21").Value
+        ' Hora final
+        newRow.Range(10).Value = ws.Range("E21").Value
+        ' Con derecho a gozar
+        newRow.Range(12).Value = ws.Range("G28").Value
+        
+        ' Limpiar los campos después de guardar los datos
+        ws.Range("C9").ClearContents
+        ' ws.Range("G10").ClearContents
+        ' ws.Range("G9").ClearContents
+        ' ws.Range("B13").ClearContents
+        ' ws.Range("C17:E17").ClearContents
+        ' ws.Range("G17").ClearContents
+        ' ws.Range("C21").ClearContents
+        ' ws.Range("G28").ClearContents
+        
+        ' Guardar y cerrar el libro destino si se abrió
+        If Not libroAbierto Then
+            wbDestino.Save
+            wbDestino.Close
+            appExcel.Quit
+        End If
+    End If
+    
+    ' Liberar recursos
+    Set wbDestino = Nothing
+    Set appExcel = Nothing
+End Sub
+
